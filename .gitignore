@@ -1,0 +1,8 @@
+__pycache__/
+emaildmzenv/
+db.sqlite3
+.DS_Store
+.vscode/
+config.py
+media/
+static/
