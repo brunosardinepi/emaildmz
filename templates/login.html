@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Login | {{ block.super }}{% endblock %}
+
+{% block body_content %}
+    <form method="post" action="{% url 'account_login' %}">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            {{ form.non_field_errors }}
+        {% endif %}
+
+        {% render_field form.login %}
+        {% if form.login.errors %}
+            {% for error in form.login.errors %}
+                {{ error|escape }}
+            {% endfor %}
+        {% endif %}
+
+        {% render_field form.password %}
+        {% if form.password.errors %}
+            {% for error in form.password.errors %}
+                {{ error|escape }}
+            {% endfor %}
+        {% endif %}
+
+
+            {% render_field form.remember %}
+            <label for="{{ form.remember.id_for_label }}">
+                Remember me
+            </label>
+
+        {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+        <button type="submit">Login</button>
+        <p><a href="{% url 'account_reset_password' %}">Forgot password?</a></p>
+    </form>
+    <p>Don't have an account yet? <a href="{% url 'signup' %}">Sign up</a></p>
+{% endblock %}

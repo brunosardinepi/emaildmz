@@ -1,0 +1,13 @@
+{% extends 'layout.html' %}
+
+{% load static %}
+
+{% block title %} Home | {{ block.super }}{% endblock %}
+
+{% block body_content %}
+    {% if user.is_authenticated %}
+        <p>Authenticated</p>
+    {% else %}
+        <p>Unauthenticated</p>
+    {% endif %}
+{% endblock %}

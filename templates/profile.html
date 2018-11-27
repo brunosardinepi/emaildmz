@@ -1,0 +1,7 @@
+{% extends 'layout.html' %}
+
+{% block title %}Profile | {{ block.super }}{% endblock %}
+
+{% block body_content %}
+    Email: {{ user.email }}
+{% endblock %}
