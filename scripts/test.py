@@ -75,7 +75,7 @@ def send_email(content):
             from_email = from_email.replace(">", "")
 
         # locating the recipient
-        keyword = "X-Original-To: "
+        keyword = "To: "
         if re.match('^{}'.format(keyword), line):
             to_email = line.split(keyword)[1].strip()
             user_id = get_user_id(to_email)
