@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+
+{% load static %}
+
+{% block title %}Domains | {{ block.super }}{% endblock %}
+
+{% block body_content %}
+    {% if object_list %}
+        <ul>
+            {% for domain in object_list %}
+                <li>{{ domain }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No domains configured.</p>
+    {% endif %}
+{% endblock %}

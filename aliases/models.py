@@ -9,6 +9,12 @@ class Alias(models.Model):
     class Meta:
         verbose_name_plural = 'Aliases'
 
+    def __str__(self):
+        return "{}@emaildmz.com".format(self.name)
+
 class ForwardingEmail(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     email = models.EmailField()
+
+    def __str__(self):
+        return self.email
