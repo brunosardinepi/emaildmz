@@ -89,14 +89,14 @@ def send_email(content):
     message_items = dict(message.items())
 
     # get the user id based on the email 'to' header
-    user_id = get_user_id(message_items['To'])
+    user_id = get_user_id(message_items['Delivered-To'])
 
     # if we got None for user_id, there's no user with this email, so we abort
     if user_id is None:
         return
 
     # get the forwarding emails
-    forwarding_emails = get_forwarding_emails(message_items['To'], user_id)
+    forwarding_emails = get_forwarding_emails(message_items['Delivered-To'], user_id)
 
     # creating the full email
     # use 'alternative': https://en.wikipedia.org/wiki/MIME#Alternative
