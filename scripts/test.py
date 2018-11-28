@@ -20,7 +20,6 @@ from emaildmz import config
 
 
 def get_user_id(user_email):
-    # NEED TO HANDLE NO USER ID EXISTING
     # find the user id based on the alias that the email was sent to
     conn = psycopg2.connect(host=config.settings['db_host'],
                             database=config.settings['db_name'],
@@ -28,34 +27,55 @@ def get_user_id(user_email):
                             password=config.settings['db_password'],
     )
     cur = conn.cursor()
+
+    # alias in the db is the first half of the email address, before the '@'
     alias_name = user_email.split('@')[0]
+
+    # get the user_id based on the alias
     cur.execute("SELECT user_id FROM aliases_alias WHERE name = %s",
         (alias_name,))
-    user_id = cur.fetchone()[0]
+    row = cur.fetchone()
 
+    # if we found something, assign to user_id
+    if row is not None:
+        user_id = row[0]
+    # otherwise, set to None
+    else:
+        user_id = None
+
+    # close the db connection
     cur.close()
     conn.close()
 
     return user_id
 
 def get_forwarding_emails(user_email, user_id):
-    # NEED TO HANDLE NO FORWARDING EMAILS EXISTING
+    # find the user's forwarding emails
     conn = psycopg2.connect(host=config.settings['db_host'],
                             database=config.settings['db_name'],
                             user=config.settings['db_user'],
                             password=config.settings['db_password'],
     )
     cur = conn.cursor()
+
+    # get the forwarding emails based on the user_id
     cur.execute("SELECT email FROM aliases_forwardingemail WHERE user_id = %s",
         (user_id,))
-    forwarding_emails = [row[0] for row in cur.fetchall()]
+    rows = cur.fetchall()
 
+    # convert the query results to a list
+    forwarding_emails = [row[0] for row in rows]
+
+    # get the user's real email address
     cur.execute("SELECT email FROM auth_user WHERE id = %s",
         (user_id,))
-    user_email = cur.fetchone()[0]
+    row = cur.fetchone()
+    user_email = row[0]
 
+    # add the user's real email address to the list of recipients
     forwarding_emails.append(user_email)
 
+    # close the db connection
     cur.close()
     conn.close()
 
@@ -70,6 +90,10 @@ def send_email(content):
 
     # get the user id based on the email 'to' header
     user_id = get_user_id(message_items['To'])
+
+    # if we got None for user_id, there's no user with this email, so we abort
+    if user_id is None:
+        return
 
     # get the forwarding emails
     forwarding_emails = get_forwarding_emails(message_items['To'], user_id)
