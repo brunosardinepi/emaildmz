@@ -4,6 +4,7 @@ from email.message import EmailMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.parser import FeedParser
+from email import message_from_file
 import datetime
 import psycopg2
 import re
@@ -61,68 +62,33 @@ def get_forwarding_emails(user_email, user_id):
     return forwarding_emails
 
 def send_email(content):
-    # setup for reading the body of the email
-    content = content.readlines()
-    parser = FeedParser()
+    # convert stdin.sys to email Message
+    message = message_from_file(content)
 
-    # NEED A BETTER WAY TO FIND FROM, TO, SUBJECT
-    for line in content:
-        # reading the body of the email
-        parser.feed(line)
+    # get a dict of the message headers and their values
+    message_items = dict(message.items())
 
-        # locating the sender
-        keyword = "Return-Path: "
-        if re.match('^{}'.format(keyword), line):
-            from_email = line.split(keyword)[1].strip()
-            from_email = from_email.replace("<", "")
-            from_email = from_email.replace(">", "")
+    # get the user id based on the email 'to' header
+    user_id = get_user_id(message_items['To'])
 
-        # locating the recipient
-        keyword = "To: "
-        if re.match('^{}'.format(keyword), line):
-            to_email = line.split(keyword)[1].strip()
-            user_id = get_user_id(to_email)
-            forwarding_emails = get_forwarding_emails(to_email, user_id)
-
-        # locating the subject
-        keyword = "Subject: "
-        if re.match('^{}'.format(keyword), line):
-            subject = line.split(keyword)[1].strip()
-
-    # creating the body of the email
-    message = parser.close()
-    message = message.get_payload()
+    # get the forwarding emails
+    forwarding_emails = get_forwarding_emails(message_items['To'], user_id)
 
     # creating the full email
     # use 'alternative': https://en.wikipedia.org/wiki/MIME#Alternative
     email = MIMEMultipart('alternative')
-    email['Subject'] = "[{}] {}".format(from_email, subject)
+    email['Subject'] = "{} {}".format(
+        message_items['Return-Path'],
+        message_items['Subject'],
+        )
     email['From'] = 'no-reply@emaildmz.com'
     email['To'] = ", ".join(forwarding_emails)
-
-    if isinstance(message, str):
-        # i think this is a plaintext email
-        message = MIMEText(message)
-        email.attach(message)
-    elif isinstance(message, list):
-        # message is a list of Messages, so just set payload to message
-        email.set_payload(message)
+    email.set_payload(message)
 
     # sending the email
     s = smtplib.SMTP('localhost')
     s.sendmail(email['From'], forwarding_emails, email.as_string())
     s.quit()
 
-def get_body(content):
-    content = content.readlines()
-    open("/home/gnowak/test.txt", "w").close()
-    with open("/home/gnowak/test.txt", "a") as file:
-        for line in content:
-            file.write("line = {}".format(line))
-
 if __name__ == "__main__":
-#    user_id = get_user_id('gn9012@gmail.com')
-#    forwarding_emails = get_forwarding_emails('gn9012@gmail.com', user_id)
     send_email(sys.stdin)
-#    get_body(sys.stdin)
-
