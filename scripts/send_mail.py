@@ -1,4 +1,4 @@
-#!/home/gnowak/emaildmz/emaildmzenv/bin/python
+#!/home/relay/emaildmz/emaildmzenv/bin/python
 
 from email.message import EmailMessage
 from email.mime.multipart import MIMEMultipart
@@ -12,7 +12,7 @@ import smtplib
 import sys
 
 import django, os, sys
-sys.path.append("/home/gnowak/emaildmz")
+sys.path.append("/home/relay/emaildmz")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "emaildmz.settings")
 django.setup()
 
