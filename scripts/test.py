@@ -91,13 +91,38 @@ def send_email(content):
     message = message.get_payload()
 
     # creating the full email
-    email = MIMEMultipart()
+    email = MIMEMultipart('alternative')
     email['Subject'] = "[{}] {}".format(from_email, subject)
     email['From'] = 'no-reply@emaildmz.com'
     email['To'] = ", ".join(forwarding_emails)
 
-    message = MIMEText(message)
-    email.attach(message)
+    # if there are more than one messages,
+    # check the content type
+    # if it's text/plain, attach message to email as MIMEText
+    # if it's text/html, attach message to email as MIMEMultipart(?)
+
+    if isinstance(message, str):
+        # i think this is a plaintext email
+        message = MIMEText(message)
+        email.attach(message)
+    elif isinstance(message, list):
+        # message is a list of Messages, so just set payload to message
+        email.set_payload(message)
+
+# this fails for some reason idk
+# maybe it wants to return a list of Messages but it's already a list of Messages?
+#        email.attach(message)
+
+# this produces two copies: one plain, one html
+#            email.attach(m)
+
+# this fails because m is already a Message
+#            content_type = m.get_content_type()
+#            if content_type == "text/plain":
+#                content = MIMEText(m)
+#            elif content_type == "text/html":
+#                content = MIMEMultipart(m)
+#            email.attach(content)
 
     # sending the email
     s = smtplib.SMTP('localhost')
