@@ -19,6 +19,7 @@ from emaildmz import config
 
 
 def get_user_id(user_email):
+    # NEED TO HANDLE NO USER ID EXISTING
     # find the user id based on the alias that the email was sent to
     conn = psycopg2.connect(host=config.settings['db_host'],
                             database=config.settings['db_name'],
@@ -37,6 +38,7 @@ def get_user_id(user_email):
     return user_id
 
 def get_forwarding_emails(user_email, user_id):
+    # NEED TO HANDLE NO FORWARDING EMAILS EXISTING
     conn = psycopg2.connect(host=config.settings['db_host'],
                             database=config.settings['db_name'],
                             user=config.settings['db_user'],
@@ -63,6 +65,7 @@ def send_email(content):
     content = content.readlines()
     parser = FeedParser()
 
+    # NEED A BETTER WAY TO FIND FROM, TO, SUBJECT
     for line in content:
         # reading the body of the email
         parser.feed(line)
