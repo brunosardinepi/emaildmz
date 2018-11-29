@@ -4,7 +4,7 @@ from django.db import models
 
 class Alias(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=254)
+    name = models.CharField(max_length=254, unique=True)
 
     class Meta:
         verbose_name_plural = 'Aliases'

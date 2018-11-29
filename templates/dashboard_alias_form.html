@@ -1,0 +1,21 @@
+{% load widget_tweaks %}
+
+
+<form method="POST" action="{% url 'aliases:alias_create' %}">
+    {% csrf_token %}
+
+    {% if alias_form.non_field_errors %}
+        {{ alias_form.non_field_errors }}
+    {% endif %}
+
+    {% render_field alias_form.name placeholder="Alias name" %}
+    <button type="submit">Create</button>
+
+    {% if alias_form.name.errors %}
+        {% for error in alias_form.name.errors %}
+            {{ error|escape }}
+        {% endfor %}
+    {% endif %}
+
+</form>
+

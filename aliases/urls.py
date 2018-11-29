@@ -7,5 +7,5 @@ from . import views
 app_name = 'aliases'
 
 urlpatterns = [
-#    path('', views.ForwardingEmailListView.as_view(), name='forwardingemail_list'),
+    path('create/', views.AliasCreate.as_view(), name='alias_create'),
 ]

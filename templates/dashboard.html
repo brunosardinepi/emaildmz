@@ -4,6 +4,7 @@
 
 {% block body_content %}
 Aliases
+{% include "dashboard_alias_form.html" %}
 <ul>
     {% if aliases %}
         {% for alias in aliases %}

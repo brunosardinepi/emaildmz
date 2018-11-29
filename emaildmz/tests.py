@@ -53,21 +53,6 @@ class HomeTest(TestCase):
         self.domains[5].user = self.users[1]
         self.domains[5].save()
 
-    def test_alias_exists(self):
-        aliases = Alias.objects.all()
-        for alias in self.aliases:
-            self.assertIn(alias, aliases)
-
-    def test_forwardingemail_exists(self):
-        forwardingemails = ForwardingEmail.objects.all()
-        for forwardingemail in self.forwardingemails:
-            self.assertIn(forwardingemail, forwardingemails)
-
-    def test_domain_exists(self):
-        domains = Domain.objects.all()
-        for domain in self.domains:
-            self.assertIn(domain, domains)
-
     def test_dashboard(self):
         response = self.client.get('/dashboard/')
         self.assertRedirects(response, '/accounts/login/?next=/dashboard/', 302, 200)

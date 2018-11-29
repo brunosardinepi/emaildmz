@@ -31,6 +31,14 @@
             {% endif %}
         </nav>
 
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
         {% block body_content %}{% endblock %}
 
         {% include "footer.html" %}
