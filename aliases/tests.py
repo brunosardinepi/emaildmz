@@ -45,6 +45,7 @@ class AliasTest(TestCase):
         # so we don't have to do them individually in all the other tests
         urls = {
             '/aliases/create/': 'post',
+            '/aliases/delete/{}/'.format(self.aliases[0].name): 'post',
         }
 
         for url, method in urls.items():
@@ -84,6 +85,39 @@ class AliasTest(TestCase):
             'name': 'testalias',
         })
         self.assertEquals(form.is_valid(), True)
+
+    def test_alias_delete(self):
+        # login as user 1 (not the owner)
+        self.client.force_login(self.users[1])
+
+        # submit the POST request with an empty data dict
+        response = self.client.post('/aliases/delete/{}/'.format(
+            self.aliases[0].name), {})
+
+        # make sure it raises 404
+        self.assertEqual(response.status_code, 404)
+
+        # logout as user 1
+        self.client.logout()
+
+        # login as user 0 (owner)
+        self.client.force_login(self.users[0])
+
+        # submit the POST request with an empty data dict
+        response = self.client.post('/aliases/delete/{}/'.format(
+            self.aliases[0].name), {})
+
+        # make sure it redirects to the dashboard
+        self.assertRedirects(response, '/dashboard/', 302, 200)
+
+        # check that the dashboard doesn't show the name
+        response = self.client.get('/dashboard/')
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, self.aliases[0].name)
+
+        # check that the alias is gone
+        aliases = Alias.objects.all()
+        self.assertNotIn(self.aliases[0], aliases)
 
 class ForwardingEmailTest(TestCase):
     def setUp(self):

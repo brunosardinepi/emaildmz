@@ -8,7 +8,7 @@ Aliases
 <ul>
     {% if aliases %}
         {% for alias in aliases %}
-            <li>{{ alias }}</li>
+            <li>{{ alias }} <a href="{% url 'aliases:alias_delete' name=alias.name %}">Delete</a></li>
         {% endfor %}
     {% else %}
         <li>None</li>

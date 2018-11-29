@@ -8,4 +8,5 @@ app_name = 'aliases'
 
 urlpatterns = [
     path('create/', views.AliasCreate.as_view(), name='alias_create'),
+    path('delete/<str:name>/', views.AliasDelete.as_view(), name='alias_delete'),
 ]

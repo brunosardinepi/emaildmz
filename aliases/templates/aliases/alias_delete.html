@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+
+{% block title %}Delete Alias | {{ block.super }}{% endblock %}
+
+{% block body_content %}
+    {{ alias }}<br />
+    <form method="post">
+        {% csrf_token %}
+        <p>Delete it?</p>
+        <input type="submit" value="Confirm">
+    </form>
+{% endblock %}
