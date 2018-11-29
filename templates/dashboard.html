@@ -1,0 +1,38 @@
+{% extends 'layout.html' %}
+
+{% block title %}Dashboard | {{ block.super }}{% endblock %}
+
+{% block body_content %}
+Aliases
+<ul>
+    {% if aliases %}
+        {% for alias in aliases %}
+            <li>{{ alias }}</li>
+        {% endfor %}
+    {% else %}
+        <li>None</li>
+    {% endif %}
+</ul>
+
+Forwarding Emails
+<ul>
+    {% if forwardingemails %}
+        {% for forwardingemail in forwardingemails %}
+            <li>{{ forwardingemail }}</li>
+        {% endfor %}
+    {% else %}
+        <li>None</li>
+    {% endif %}
+</ul>
+
+Domains
+<ul>
+    {% if domains %}
+        {% for domain in domains %}
+            <li>{{ domain }}</li>
+        {% endfor %}
+    {% else %}
+        <li>None</li>
+    {% endif %}
+</ul>
+{% endblock %}
