@@ -67,15 +67,16 @@ class HomeTest(TestCase):
             for alias in self.aliases:
                 if alias.user == user:
                     self.assertContains(response, alias.name)
+
+                    # check for user's forwardingemails
+                    for forwardingemail in self.forwardingemails:
+                        if forwardingemail.user == user and forwardingemail.alias == alias:
+                            self.assertContains(response, forwardingemail.email)
+                        else:
+                            self.assertNotContains(response, forwardingemail.email)
+
                 else:
                     self.assertNotContains(response, alias.name)
-
-            # check for user's forwardingemails
-            for forwardingemail in self.forwardingemails:
-                if forwardingemail.user == user:
-                    self.assertContains(response, forwardingemail.email)
-                else:
-                    self.assertNotContains(response, forwardingemail.email)
 
             # check for user's domains
             for domain in self.domains:
