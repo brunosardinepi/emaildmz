@@ -49,7 +49,7 @@ class DomainDelete(View):
             raise Http404
 
     def post(self, request, *args, **kwargs):
-        # get the domain based on the name in the url
+        # get the domain based on the pk in the url
         domain = get_object_or_404(Domain, pk=kwargs['pk'])
 
         # store the domain's alias for the redirect later
@@ -63,6 +63,38 @@ class DomainDelete(View):
 
             # redirect to the dashboard
             return redirect(alias.get_absolute_url())
+
+        # bad stuff happening here
+        else:
+            raise Http404
+
+@method_decorator(login_required, name='dispatch')
+class DomainFilter(View):
+    def get(self, request, *args, **kwargs):
+        # get the domain based on the pk in the url
+        domain = get_object_or_404(Domain, pk=kwargs['pk'])
+
+        # make sure the person who submitted this is the owner
+        if domain.user == request.user:
+
+            # determine the action
+            if kwargs['action'] == "allow":
+                # set the domain to "allowed"
+                domain.is_blocked = False
+
+            elif kwargs['action'] == "block":
+                # set the domain to "blocked"
+                domain.is_blocked = True
+
+            else:
+                # this isn't an option
+                raise Http404
+
+            # save the changes
+            domain.save()
+
+            # redirect to the dashboard
+            return redirect(domain.alias.get_absolute_url())
 
         # bad stuff happening here
         else:

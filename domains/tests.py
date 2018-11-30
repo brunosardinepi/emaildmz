@@ -27,6 +27,7 @@ class DomainTest(TestCase):
             Domain,
             user=self.users[0],
             alias=self.aliases[0],
+            is_blocked=False,
             _quantity=6,
             _fill_optional=True,
         )
@@ -45,11 +46,12 @@ class DomainTest(TestCase):
         }
 
     def test_unauthenticated_redirects(self):
-        # test all the unauthenticated redirects here
-        # so we don't have to do them individually in all the other tests
+        # test all the unauthenticated redirects
         urls = {
             '/domains/{}/create/'.format(self.aliases[0].name): ['post'],
             '/domains/{}/delete/'.format(self.domains[0].pk): ['get', 'post'],
+            '/domains/{}/filter/allow/'.format(self.domains[0].pk): ['get'],
+            '/domains/{}/filter/block/'.format(self.domains[0].pk): ['get'],
         }
 
         for url, method_list in urls.items():
@@ -62,6 +64,28 @@ class DomainTest(TestCase):
 
             # test for the redirect
             self.assertRedirects(response, '/accounts/login/?next={}'.format(url), 302, 200)
+
+    def test_bad_authenticated_404(self):
+        # test all the 404 responses for authenticated users
+        # who are accessing things they don't have access to
+        urls = {
+            '/domains/{}/delete/'.format(self.domains[0].pk): ['get', 'post'],
+            '/domains/{}/filter/allow/'.format(self.domains[0].pk): ['get'],
+            '/domains/{}/filter/block/'.format(self.domains[0].pk): ['get'],
+        }
+
+        self.client.force_login(self.users[2])
+
+        for url, method_list in urls.items():
+            for method in method_list:
+                # check which method to use
+                if method == 'post':
+                    response = self.client.post(url)
+                elif method == 'get':
+                    response = self.client.get(url)
+
+            # test for 404
+            self.assertEqual(response.status_code, 404)
 
     def test_domain_exists(self):
         # make sure all of the domains are being created correctly
@@ -104,18 +128,6 @@ class DomainTest(TestCase):
         self.assertEquals(form.is_valid(), True)
 
     def test_domain_delete(self):
-        # login as user 1 (not the owner)
-        self.client.force_login(self.users[1])
-
-        # submit the POST request with an empty data dict
-        response = self.client.post('/domains/{}/delete/'.format(self.domains[0].pk), {})
-
-        # make sure it raises 404
-        self.assertEqual(response.status_code, 404)
-
-        # logout as user 1
-        self.client.logout()
-
         # login as user 0 (owner)
         self.client.force_login(self.users[0])
 
@@ -136,4 +148,30 @@ class DomainTest(TestCase):
         domains = Domain.objects.all()
         self.assertNotIn(self.domains[0], domains)
 
+    def test_domain_block(self):
+        # login as user 0 (owner)
+        self.client.force_login(self.users[0])
 
+        # define actions for loop
+        actions = ['allow', 'block']
+
+        # test for each action
+        for action in actions:
+
+            # GET request for action
+            response = self.client.get('/domains/{}/filter/{}/'.format(
+                self.domains[0].pk, action))
+
+            # check the redirect
+            self.assertRedirects(response,
+                '/dashboard/{}/'.format(self.domains[0].alias.name),
+                302, 200)
+
+            # reload object's values
+            self.domains[0].refresh_from_db()
+
+            # make sure the object has changed
+            if action == 'allow':
+                self.assertEqual(self.domains[0].is_blocked, False)
+            elif action == 'block':
+                self.assertEqual(self.domains[0].is_blocked, True)
