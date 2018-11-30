@@ -1,7 +1,7 @@
 from django.forms import ModelForm
 from django.utils.translation import gettext_lazy as _
 
-from .models import Alias
+from .models import Alias, ForwardingEmail
 
 
 class AliasForm(ModelForm):
@@ -13,3 +13,8 @@ class AliasForm(ModelForm):
                 'unique': _("Someone is already using this alias. Try a different one."),
             },
         }
+
+class ForwardingEmailForm(ModelForm):
+    class Meta:
+        model = ForwardingEmail
+        fields = ['email']

@@ -5,9 +5,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
 from django.views import View
 
-from .forms import AliasForm
+from .forms import AliasForm, ForwardingEmailForm
 from .models import Alias, ForwardingEmail
 from .utils import get_user_aliases
+from emaildmz.utils import get_form_errors
 
 
 @method_decorator(login_required, name='dispatch')
@@ -23,17 +24,11 @@ class AliasCreate(View):
             alias.save()
 
         else:
-            # put the errors into a dictionary to strip the html
-            # this produces a key, value pair
-            # where key is the field name and value is a list of errors
-            for field, error_list in form.errors.get_json_data().items():
-                for error in error_list:
-                    # get the message from the list element
-                    # and add it to the site messages as an error
-                    messages.add_message(request, messages.ERROR, error['message'])
+            # process form errors
+            get_form_errors(request, form)
 
         # whether it's a good form or not, take them to the dashboard
-        return redirect('dashboard')
+        return redirect(alias.get_absolute_url())
 
 @method_decorator(login_required, name='dispatch')
 class AliasDelete(View):
@@ -62,6 +57,61 @@ class AliasDelete(View):
 
             # delete the alias
             alias.delete()
+
+            # redirect to the dashboard
+            return redirect('dashboard')
+
+        # bad stuff happening here
+        else:
+            raise Http404
+
+@method_decorator(login_required, name='dispatch')
+class ForwardingEmailCreate(View):
+    def post(self, request, *args, **kwargs):
+        # create the form with the POST data
+        form = ForwardingEmailForm(request.POST)
+
+        if form.is_valid():
+            # assign the forwardingemail to this user and alias, then save
+            forwardingemail = form.save(commit=False)
+            forwardingemail.user = self.request.user
+            forwardingemail.alias = get_object_or_404(Alias, name=kwargs['alias_name'])
+            forwardingemail.save()
+
+        else:
+            # process form errors
+            get_form_errors(request, form)
+
+        # whether it's a good form or not, take them to the dashboard
+        return redirect(forwardingemail.alias.get_absolute_url())
+
+@method_decorator(login_required, name='dispatch')
+class ForwardingEmailDelete(View):
+    def get(self, request, *args, **kwargs):
+        # get the forwardingemail based on the pk in the url
+        forwardingemail = get_object_or_404(ForwardingEmail, pk=kwargs['pk'])
+
+        # make sure the person viewing this page is the owner
+        if forwardingemail.user == request.user:
+
+            # go to the delete confirmation page
+            return render(request, 'aliases/forwardingemail_delete.html', {
+                'forwardingemail': forwardingemail,
+            })
+
+        # bad stuff happening here
+        else:
+            raise Http404
+
+    def post(self, request, *args, **kwargs):
+        # get the forwardingemail based on the name in the url
+        forwardingemail = get_object_or_404(ForwardingEmail, pk=kwargs['pk'])
+
+        # make sure the person who submitted this is the owner
+        if forwardingemail.user == request.user:
+
+            # delete the forwardingemail
+            forwardingemail.delete()
 
             # redirect to the dashboard
             return redirect('dashboard')

@@ -8,14 +8,15 @@ Aliases
 <ul>
     {% if aliases %}
         {% for alias in aliases %}
-            <li>{{ alias }} <a href="{% url 'aliases:alias_delete' name=alias.name %}">Delete</a></li>
+            <li>{% if alias == active_alias %}> {% endif %}<a href="{% url 'dashboard' alias_name=alias.name %}">{{ alias }}</a> <a href="{% url 'aliases:alias_delete' name=alias.name %}">Delete</a></li>
         {% endfor %}
     {% else %}
         <li>None</li>
     {% endif %}
 </ul>
 
-Forwarding Emails
+Forwarding Emails{% if active_alias %} for "{{ active_alias }}"{% endif %}
+{% include "dashboard_forwardingemail_form.html" %}
 <ul>
     {% if forwardingemails %}
         {% for forwardingemail in forwardingemails %}
