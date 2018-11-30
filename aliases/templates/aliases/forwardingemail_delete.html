@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+
+{% block title %}Remove Forwarding Email | {{ block.super }}{% endblock %}
+
+{% block body_content %}
+    {{ alias }}<br />
+    <form method="post">
+        {% csrf_token %}
+        <p>Remove it?</p>
+        <input type="submit" value="Confirm">
+    </form>
+{% endblock %}

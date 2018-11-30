@@ -20,7 +20,7 @@ Forwarding Emails{% if active_alias %} for "{{ active_alias }}"{% endif %}
 <ul>
     {% if forwardingemails %}
         {% for forwardingemail in forwardingemails %}
-            <li>{{ forwardingemail }}</li>
+            <li>{{ forwardingemail }} <a href="{% url 'aliases:forwardingemail_delete' pk=forwardingemail.pk %}">Remove</a></li>
         {% endfor %}
     {% else %}
         <li>None</li>

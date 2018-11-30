@@ -107,6 +107,9 @@ class ForwardingEmailDelete(View):
         # get the forwardingemail based on the name in the url
         forwardingemail = get_object_or_404(ForwardingEmail, pk=kwargs['pk'])
 
+        # store the forwardingemail's alias for the redirect later
+        alias = forwardingemail.alias
+
         # make sure the person who submitted this is the owner
         if forwardingemail.user == request.user:
 
@@ -114,7 +117,7 @@ class ForwardingEmailDelete(View):
             forwardingemail.delete()
 
             # redirect to the dashboard
-            return redirect('dashboard')
+            return redirect(alias.get_absolute_url())
 
         # bad stuff happening here
         else:

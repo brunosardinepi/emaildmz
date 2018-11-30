@@ -13,7 +13,7 @@ urlpatterns = [
     path('<str:alias_name>/forwardingemail/create/',
         views.ForwardingEmailCreate.as_view(),
         name='forwardingemail_create'),
-    path('<str:alias_name>/forwardingemail/<int:pk>/delete/',
+    path('forwardingemail/<int:pk>/delete/',
         views.ForwardingEmailDelete.as_view(),
         name='forwardingemail_delete'),
 ]
