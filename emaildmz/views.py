@@ -11,16 +11,13 @@ from aliases.models import Alias
 from aliases.utils import (get_alias_forwardingemails,
                            get_user_aliases,
                            get_user_forwardingemails)
-from domains.utils import get_user_domains
+from domains.forms import DomainForm
+from domains.utils import get_alias_domains, get_user_domains
 
 
 @login_required
 def dashboard_view(request, alias_name=None):
-    alias_form = AliasForm()
     aliases = get_user_aliases(request.user)
-    domains = get_user_domains(request.user)
-#    forwardingemails = get_user_forwardingemails(request.user)
-    forwardingemail_form = ForwardingEmailForm()
 
     if alias_name:
         # find the alias object
@@ -37,29 +34,33 @@ def dashboard_view(request, alias_name=None):
         # otherwise, there is no active alias
         else:
             active_alias = None
+            domains = None
 
     if active_alias:
         # if there's an active alias, make sure the person viewing this is the owner
         if not active_alias.user == request.user:
             raise Http404
 
-        # get the active alias's forwardingemails
-        # note: we've already made sure this user is the owner
+        # at this point, we've made sure this user is the owner
         else:
+            # get the active alias's forwardingemails
             forwardingemails = get_alias_forwardingemails(active_alias)
+
+            # get the active alias's domains
+            domains = get_alias_domains(active_alias)
 
     # no active alias, so no forwardingemails to get
     else:
         forwardingemails = None
 
-
     return render(request, 'dashboard.html', {
         'active_alias': active_alias,
-        'alias_form': alias_form,
+        'alias_form': AliasForm(),
         'aliases': aliases,
+        'domain_form': DomainForm(),
         'domains': domains,
+        'forwardingemail_form': ForwardingEmailForm(),
         'forwardingemails': forwardingemails,
-        'forwardingemail_form': forwardingemail_form,
     })
 
 @method_decorator(login_required, name='dispatch')

@@ -75,14 +75,14 @@ class HomeTest(TestCase):
                         else:
                             self.assertNotContains(response, forwardingemail.email)
 
+                    # check for user's domains
+                    for domain in self.domains:
+                        if domain.user == user and domain.alias == alias:
+                            self.assertContains(response, domain.name)
+                        else:
+                            self.assertNotContains(response, domain.name)
+
                 else:
                     self.assertNotContains(response, alias.name)
-
-            # check for user's domains
-            for domain in self.domains:
-                if domain.user == user:
-                    self.assertContains(response, domain.name)
-                else:
-                    self.assertNotContains(response, domain.name)
 
             self.client.logout()

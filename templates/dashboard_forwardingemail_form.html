@@ -1,7 +1,7 @@
 {% load widget_tweaks %}
 
 
-{% if active_alias %}
+{% if aliases %}
     <form method="POST" action="{% url 'aliases:forwardingemail_create' alias_name=active_alias.name %}">
         {% csrf_token %}
     

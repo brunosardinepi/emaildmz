@@ -1,0 +1,11 @@
+{% extends 'layout.html' %}
+
+{% block title %}Remove Domain | {{ block.super }}{% endblock %}
+
+{% block body_content %}
+    <form method="post">
+        {% csrf_token %}
+        <p>Remove it?</p>
+        <input type="submit" value="Confirm">
+    </form>
+{% endblock %}

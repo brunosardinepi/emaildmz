@@ -28,10 +28,11 @@ Forwarding Emails{% if active_alias %} for "{{ active_alias }}"{% endif %}
 </ul>
 
 Domains
+{% include "dashboard_domain_form.html" %}
 <ul>
     {% if domains %}
         {% for domain in domains %}
-            <li>{{ domain }}</li>
+            <li>{{ domain }} <a href="{% url 'domains:domain_delete' pk=domain.pk %}">Remove</a></li>
         {% endfor %}
     {% else %}
         <li>None</li>

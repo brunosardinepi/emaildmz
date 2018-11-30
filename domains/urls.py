@@ -7,5 +7,6 @@ from . import views
 app_name = 'domains'
 
 urlpatterns = [
-#    path('', views.DomainListView.as_view(), name='domain_list'),
+    path('<str:alias_name>/create/', views.DomainCreate.as_view(), name='domain_create'),
+    path('<int:pk>/delete/', views.DomainDelete.as_view(), name='domain_delete'),
 ]
