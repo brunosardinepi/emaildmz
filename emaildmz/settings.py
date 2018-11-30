@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'aliases',
     'domains',
+    'recipients',
 ]
 
 MIDDLEWARE = [

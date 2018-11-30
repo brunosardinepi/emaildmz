@@ -6,8 +6,9 @@ import unittest
 from model_mommy import mommy
 
 from . import views
-from aliases.models import Alias, ForwardingEmail
+from aliases.models import Alias
 from domains.models import Domain
+from recipients.models import Recipient
 
 
 class HomeTest(TestCase):
@@ -27,18 +28,18 @@ class HomeTest(TestCase):
         self.aliases[4].user = self.users[1]
         self.aliases[4].save()
 
-        self.forwardingemails = mommy.make(
-            ForwardingEmail,
+        self.recipients = mommy.make(
+            Recipient,
             user=self.users[0],
             _quantity=5,
             _fill_optional=True,
         )
-        self.forwardingemails[2].user = self.users[1]
-        self.forwardingemails[2].save()
-        self.forwardingemails[3].user = self.users[1]
-        self.forwardingemails[3].save()
-        self.forwardingemails[4].user = self.users[1]
-        self.forwardingemails[4].save()
+        self.recipients[2].user = self.users[1]
+        self.recipients[2].save()
+        self.recipients[3].user = self.users[1]
+        self.recipients[3].save()
+        self.recipients[4].user = self.users[1]
+        self.recipients[4].save()
 
         self.domains = mommy.make(
             Domain,
@@ -68,12 +69,12 @@ class HomeTest(TestCase):
                 if alias.user == user:
                     self.assertContains(response, alias.name)
 
-                    # check for user's forwardingemails
-                    for forwardingemail in self.forwardingemails:
-                        if forwardingemail.user == user and forwardingemail.alias == alias:
-                            self.assertContains(response, forwardingemail.email)
+                    # check for user's recipients
+                    for recipient in self.recipients:
+                        if recipient.user == user and recipient.alias == alias:
+                            self.assertContains(response, recipient.email)
                         else:
-                            self.assertNotContains(response, forwardingemail.email)
+                            self.assertNotContains(response, recipient.email)
 
                     # check for user's domains
                     for domain in self.domains:

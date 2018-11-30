@@ -9,11 +9,4 @@ app_name = 'aliases'
 urlpatterns = [
     path('create/', views.AliasCreate.as_view(), name='alias_create'),
     path('delete/<str:name>/', views.AliasDelete.as_view(), name='alias_delete'),
-
-    path('<str:alias_name>/forwardingemail/create/',
-        views.ForwardingEmailCreate.as_view(),
-        name='forwardingemail_create'),
-    path('forwardingemail/<int:pk>/delete/',
-        views.ForwardingEmailDelete.as_view(),
-        name='forwardingemail_delete'),
 ]

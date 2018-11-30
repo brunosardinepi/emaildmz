@@ -4,7 +4,7 @@
 
 {% block body_content %}
 Aliases
-{% include "dashboard_alias_form.html" %}
+{% include "aliases/dashboard_form.html" %}
 <ul>
     {% if aliases %}
         {% for alias in aliases %}
@@ -15,12 +15,12 @@ Aliases
     {% endif %}
 </ul>
 
-Forwarding Emails{% if active_alias %} for "{{ active_alias }}"{% endif %}
-{% include "dashboard_forwardingemail_form.html" %}
+Recipients{% if active_alias %} for "{{ active_alias }}"{% endif %}
+{% include "recipients/dashboard_form.html" %}
 <ul>
-    {% if forwardingemails %}
-        {% for forwardingemail in forwardingemails %}
-            <li>{{ forwardingemail }} <a href="{% url 'aliases:forwardingemail_delete' pk=forwardingemail.pk %}">Remove</a></li>
+    {% if recipients %}
+        {% for recipient in recipients %}
+            <li>{{ recipient }} <a href="{% url 'recipients:recipient_delete' pk=recipient.pk %}">Remove</a></li>
         {% endfor %}
     {% else %}
         <li>None</li>
@@ -28,7 +28,7 @@ Forwarding Emails{% if active_alias %} for "{{ active_alias }}"{% endif %}
 </ul>
 
 Domains
-{% include "dashboard_domain_form.html" %}
+{% include "domains/dashboard_form.html" %}
 <ul>
     {% if domains %}
         {% for domain in domains %}

@@ -6,14 +6,13 @@ from django.views.generic import TemplateView
 
 from allauth.account import views
 
-from aliases.forms import AliasForm, ForwardingEmailForm
+from aliases.forms import AliasForm
 from aliases.models import Alias
-from aliases.utils import (get_alias_forwardingemails,
-                           get_user_aliases,
-                           get_user_forwardingemails)
+from aliases.utils import get_alias_recipients, get_user_aliases
 from domains.forms import DomainForm
 from domains.utils import get_alias_domains, get_user_domains
-
+from recipients.forms import RecipientForm
+from recipients.models import Recipient
 
 @login_required
 def dashboard_view(request, alias_name=None):
@@ -43,15 +42,15 @@ def dashboard_view(request, alias_name=None):
 
         # at this point, we've made sure this user is the owner
         else:
-            # get the active alias's forwardingemails
-            forwardingemails = get_alias_forwardingemails(active_alias)
+            # get the active alias's recipients
+            recipients = get_alias_recipients(active_alias)
 
             # get the active alias's domains
             domains = get_alias_domains(active_alias)
 
-    # no active alias, so no forwardingemails to get
+    # no active alias, so no recipients to get
     else:
-        forwardingemails = None
+        recipients = None
 
     return render(request, 'dashboard.html', {
         'active_alias': active_alias,
@@ -59,28 +58,9 @@ def dashboard_view(request, alias_name=None):
         'aliases': aliases,
         'domain_form': DomainForm(),
         'domains': domains,
-        'forwardingemail_form': ForwardingEmailForm(),
-        'forwardingemails': forwardingemails,
+        'recipient_form': RecipientForm(),
+        'recipients': recipients,
     })
-
-@method_decorator(login_required, name='dispatch')
-class DashboardView(TemplateView):
-    template_name = 'dashboard.html'
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['alias_form'] = AliasForm()
-        context['aliases'] = get_user_aliases(self.request.user)
-        context['domains'] = get_user_domains(self.request.user)
-        context['forwardingemails'] = get_user_forwardingemails(self.request.user)
-        context['forwardingemail_form'] = ForwardingEmailForm()
-
-        if kwargs['alias_name']:
-            print("there is a alias_name in the url")
-        else:
-            print("no alias_name in url")
-
-        return context
 
 @method_decorator(login_required, name='dispatch')
 class ProfileView(TemplateView):
