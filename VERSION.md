@@ -13,6 +13,7 @@ Release date: TBD
 
 ### Changes
 
+* #6 -- log for script activity
 * #7 -- filter based on single sender or all of domain
 
 ### Fixes

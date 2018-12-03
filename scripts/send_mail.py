@@ -104,10 +104,6 @@ def get_alias_id(email):
 def domain_is_blocked(alias_id, user_id, sender_email):
     open("/home/relay/test.txt", "w").close()
 
-    # get the sender's email address
-    sender_email = sender_email.split("<")[1]
-    sender_email = sender_email.split(">")[0]
-
     # strip the domain from the sender's email
     domain = sender_email.split('@')[1]
 
@@ -205,8 +201,12 @@ def send_email(content):
     # get the user id based on the email 'to' header
     user_id = get_user_id(message_items['Delivered-To'])
 
+    # get the sender's email address
+    sender_email = message_items['Return-Path'].split("<")[1]
+    sender_email = sender_email.split(">")[0]
+
     # check if this domain is blocked for this alias
-    is_blocked = domain_is_blocked(alias_id, user_id, message_items['Return-Path'])
+    is_blocked = domain_is_blocked(alias_id, user_id, sender_email)
 
     # if this domain is blocked, bail
     if is_blocked == True:
@@ -225,8 +225,8 @@ def send_email(content):
         # creating the full email
         # use 'alternative': https://en.wikipedia.org/wiki/MIME#Alternative
         email = MIMEMultipart('alternative')
-        email['Subject'] = "{} {}".format(
-            message_items['Return-Path'],
+        email['Subject'] = "[{}] {}".format(
+            sender_email,
             message_items['Subject'],
             )
         email['From'] = 'no-reply@emaildmz.com'
@@ -237,6 +237,17 @@ def send_email(content):
         s = smtplib.SMTP('localhost')
         s.sendmail(email['From'], recipients, email.as_string())
         s.quit()
+
+        # write to log
+        with open("/home/relay/emaildmz/scripts/send_mail.log", 'a') as file:
+            file.write("[{}] FROM: {}; ALIAS: {}; RECIPIENTS: {}; SUBJECT: {}\n".format(
+                datetime.datetime.now(),
+                sender_email,
+                message_items['Delivered-To'],
+                recipients,
+                message_items['Subject'],
+                )
+            )
 
 if __name__ == "__main__":
     send_email(sys.stdin)
