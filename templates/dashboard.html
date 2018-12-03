@@ -27,12 +27,12 @@ Recipients{% if active_alias %} for "{{ active_alias }}"{% endif %}
     {% endif %}
 </ul>
 
-Domains
-{% include "domains/dashboard_form.html" %}
+Filters
+{% include "filters/dashboard_form.html" %}
 <ul>
-    {% if domains %}
-        {% for domain in domains %}
-            <li>{{ domain }} <a href="{% url 'domains:domain_filter' pk=domain.pk action='allow' %}">{% if domain.is_blocked == False %}>{% endif %}Allow</a> <a href="{% url 'domains:domain_filter' pk=domain.pk action='block' %}">{% if domain.is_blocked == True %}>{% endif %}Block</a> <a href="{% url 'domains:domain_delete' pk=domain.pk %}">Remove</a></li>
+    {% if filters %}
+        {% for filter in filters %}
+            <li>{{ filter }} <a href="{% url 'filters:filter_filter' pk=filter.pk action='allow' %}">{% if filter.is_blocked == False %}>{% endif %}Allow</a> <a href="{% url 'filters:filter_filter' pk=filter.pk action='block' %}">{% if filter.is_blocked == True %}>{% endif %}Block</a> <a href="{% url 'filters:filter_delete' pk=filter.pk %}">Remove</a></li>
         {% endfor %}
     {% else %}
         <li>None</li>

@@ -2,16 +2,16 @@
 
 {% load static %}
 
-{% block title %}Domains | {{ block.super }}{% endblock %}
+{% block title %}Filters | {{ block.super }}{% endblock %}
 
 {% block body_content %}
     {% if object_list %}
         <ul>
-            {% for domain in object_list %}
-                <li>{{ domain }}</li>
+            {% for filter in object_list %}
+                <li>{{ filter }}</li>
             {% endfor %}
         </ul>
     {% else %}
-        <p>No domains configured.</p>
+        <p>No filters configured.</p>
     {% endif %}
 {% endblock %}

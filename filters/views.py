@@ -4,44 +4,44 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
 from django.views import View
 
-from .forms import DomainForm
-from .models import Domain
+from .forms import FilterForm
+from .models import Filter
 from aliases.models import Alias
 from emaildmz.utils import get_form_errors
 
 
 @method_decorator(login_required, name='dispatch')
-class DomainCreate(View):
+class FilterCreate(View):
     def post(self, request, *args, **kwargs):
         # create the form with the POST data
-        form = DomainForm(request.POST)
+        form = FilterForm(request.POST)
 
         if form.is_valid():
-            # assign the domain to this user and alias, then save
-            domain = form.save(commit=False)
-            domain.user = self.request.user
-            domain.alias = get_object_or_404(Alias, name=kwargs['alias_name'])
-            domain.save()
+            # assign the filter to this user and alias, then save
+            filter = form.save(commit=False)
+            filter.user = self.request.user
+            filter.alias = get_object_or_404(Alias, name=kwargs['alias_name'])
+            filter.save()
 
         else:
             # process form errors
             get_form_errors(request, form)
 
         # whether it's a good form or not, take them to the dashboard
-        return redirect(domain.alias.get_absolute_url())
+        return redirect(filter.alias.get_absolute_url())
 
 @method_decorator(login_required, name='dispatch')
-class DomainDelete(View):
+class FilterDelete(View):
     def get(self, request, *args, **kwargs):
-        # get the domain based on the pk in the url
-        domain = get_object_or_404(Domain, pk=kwargs['pk'])
+        # get the filter based on the pk in the url
+        filter = get_object_or_404(Filter, pk=kwargs['pk'])
 
         # make sure the person viewing this page is the owner
-        if domain.user == request.user:
+        if filter.user == request.user:
 
             # go to the delete confirmation page
-            return render(request, 'domains/domain_delete.html', {
-                'domain': domain,
+            return render(request, 'filters/filter_delete.html', {
+                'filter': filter,
             })
 
         # bad stuff happening here
@@ -49,17 +49,17 @@ class DomainDelete(View):
             raise Http404
 
     def post(self, request, *args, **kwargs):
-        # get the domain based on the pk in the url
-        domain = get_object_or_404(Domain, pk=kwargs['pk'])
+        # get the filter based on the pk in the url
+        filter = get_object_or_404(Filter, pk=kwargs['pk'])
 
-        # store the domain's alias for the redirect later
-        alias = domain.alias
+        # store the filter's alias for the redirect later
+        alias = filter.alias
 
         # make sure the person who submitted this is the owner
-        if domain.user == request.user:
+        if filter.user == request.user:
 
-            # delete the domain
-            domain.delete()
+            # delete the filter
+            filter.delete()
 
             # redirect to the dashboard
             return redirect(alias.get_absolute_url())
@@ -69,32 +69,32 @@ class DomainDelete(View):
             raise Http404
 
 @method_decorator(login_required, name='dispatch')
-class DomainFilter(View):
+class FilterFilter(View):
     def get(self, request, *args, **kwargs):
-        # get the domain based on the pk in the url
-        domain = get_object_or_404(Domain, pk=kwargs['pk'])
+        # get the filter based on the pk in the url
+        filter = get_object_or_404(Filter, pk=kwargs['pk'])
 
         # make sure the person who submitted this is the owner
-        if domain.user == request.user:
+        if filter.user == request.user:
 
             # determine the action
             if kwargs['action'] == "allow":
-                # set the domain to "allowed"
-                domain.is_blocked = False
+                # set the filter to "allowed"
+                filter.is_blocked = False
 
             elif kwargs['action'] == "block":
-                # set the domain to "blocked"
-                domain.is_blocked = True
+                # set the filter to "blocked"
+                filter.is_blocked = True
 
             else:
                 # this isn't an option
                 raise Http404
 
             # save the changes
-            domain.save()
+            filter.save()
 
             # redirect to the dashboard
-            return redirect(domain.alias.get_absolute_url())
+            return redirect(filter.alias.get_absolute_url())
 
         # bad stuff happening here
         else:

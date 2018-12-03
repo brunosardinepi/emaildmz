@@ -11,7 +11,7 @@ urlpatterns = [
     path('accounts/signup/', views.SignupView.as_view(), name='signup'),
     path('accounts/', include('allauth.urls')),
     path('aliases/', include('aliases.urls', namespace='aliases')),
-    path('domains/', include('domains.urls', namespace='domains')),
+    path('filters/', include('filters.urls', namespace='filters')),
     path('recipients/', include('recipients.urls', namespace='recipients')),
 
     path('dashboard/', views.dashboard_view, name='dashboard'),

@@ -1,9 +1,9 @@
 from django.forms import ModelForm
 
-from .models import Domain
+from .models import Filter
 
 
-class DomainForm(ModelForm):
+class FilterForm(ModelForm):
     class Meta:
-        model = Domain
+        model = Filter
         fields = ['name']

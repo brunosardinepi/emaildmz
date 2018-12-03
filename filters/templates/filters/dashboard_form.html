@@ -1,0 +1,22 @@
+{% load widget_tweaks %}
+
+
+{% if aliases %}
+    <form method="POST" action="{% url 'filters:filter_create' alias_name=active_alias.name %}">
+        {% csrf_token %}
+    
+        {% if filter_form.non_field_errors %}
+            {{ filter_form.non_field_errors }}
+        {% endif %}
+    
+        {% render_field filter_form.name placeholder="Domain name" %}
+        <button type="submit">Add</button>
+    
+        {% if filter_form.name.errors %}
+            {% for error in filter_form.name.errors %}
+                {{ error|escape }}
+            {% endfor %}
+        {% endif %}
+    
+    </form>
+{% endif %}

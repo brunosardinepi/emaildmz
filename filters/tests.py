@@ -6,12 +6,12 @@ import unittest
 from model_mommy import mommy
 
 from . import views
-from .forms import DomainForm
-from .models import Domain
+from .forms import FilterForm
+from .models import Filter
 from aliases.models import Alias
 
 
-class DomainTest(TestCase):
+class FilterTest(TestCase):
     def setUp(self):
         self.client = Client()
 
@@ -23,23 +23,23 @@ class DomainTest(TestCase):
             _quantity=2,
             _fill_optional=True
         )
-        self.domains = mommy.make(
-            Domain,
+        self.filters = mommy.make(
+            Filter,
             user=self.users[0],
             alias=self.aliases[0],
             is_blocked=False,
             _quantity=6,
             _fill_optional=True,
         )
-        self.domains[3].user = self.users[1]
-        self.domains[3].alias = self.aliases[1]
-        self.domains[3].save()
-        self.domains[4].user = self.users[1]
-        self.domains[4].alias = self.aliases[1]
-        self.domains[4].save()
-        self.domains[5].user = self.users[1]
-        self.domains[5].alias = self.aliases[1]
-        self.domains[5].save()
+        self.filters[3].user = self.users[1]
+        self.filters[3].alias = self.aliases[1]
+        self.filters[3].save()
+        self.filters[4].user = self.users[1]
+        self.filters[4].alias = self.aliases[1]
+        self.filters[4].save()
+        self.filters[5].user = self.users[1]
+        self.filters[5].alias = self.aliases[1]
+        self.filters[5].save()
 
         self.form_data = {
             'name': 'test.test',
@@ -48,10 +48,10 @@ class DomainTest(TestCase):
     def test_unauthenticated_redirects(self):
         # test all the unauthenticated redirects
         urls = {
-            '/domains/{}/create/'.format(self.aliases[0].name): ['post'],
-            '/domains/{}/delete/'.format(self.domains[0].pk): ['get', 'post'],
-            '/domains/{}/filter/allow/'.format(self.domains[0].pk): ['get'],
-            '/domains/{}/filter/block/'.format(self.domains[0].pk): ['get'],
+            '/filters/{}/create/'.format(self.aliases[0].name): ['post'],
+            '/filters/{}/delete/'.format(self.filters[0].pk): ['get', 'post'],
+            '/filters/{}/filter/allow/'.format(self.filters[0].pk): ['get'],
+            '/filters/{}/filter/block/'.format(self.filters[0].pk): ['get'],
         }
 
         for url, method_list in urls.items():
@@ -69,9 +69,9 @@ class DomainTest(TestCase):
         # test all the 404 responses for authenticated users
         # who are accessing things they don't have access to
         urls = {
-            '/domains/{}/delete/'.format(self.domains[0].pk): ['get', 'post'],
-            '/domains/{}/filter/allow/'.format(self.domains[0].pk): ['get'],
-            '/domains/{}/filter/block/'.format(self.domains[0].pk): ['get'],
+            '/filters/{}/delete/'.format(self.filters[0].pk): ['get', 'post'],
+            '/filters/{}/filter/allow/'.format(self.filters[0].pk): ['get'],
+            '/filters/{}/filter/block/'.format(self.filters[0].pk): ['get'],
         }
 
         self.client.force_login(self.users[2])
@@ -87,29 +87,29 @@ class DomainTest(TestCase):
             # test for 404
             self.assertEqual(response.status_code, 404)
 
-    def test_domain_exists(self):
-        # make sure all of the domains are being created correctly
-        domains = Domain.objects.all()
-        for domain in self.domains:
-            self.assertIn(domain, domains)
+    def test_filter_exists(self):
+        # make sure all of the filters are being created correctly
+        filters = Filter.objects.all()
+        for filter in self.filters:
+            self.assertIn(filter, filters)
 
-    def test_no_domains(self):
-        # someone with no created domains should not see any domains
+    def test_no_filters(self):
+        # someone with no created filters should not see any filters
         # login as user 2
         self.client.force_login(self.users[2])
 
         # view the dashboard
         response = self.client.get('/dashboard/')
         self.assertEqual(response.status_code, 200)
-        for domain in self.domains:
-            self.assertNotContains(response, domain.name)
+        for filter in self.filters:
+            self.assertNotContains(response, filter.name)
 
-    def test_domain_create(self):
+    def test_filter_create(self):
         # login as user 0
         self.client.force_login(self.users[0])
 
         # submit the POST request
-        response = self.client.post('/domains/{}/create/'.format(
+        response = self.client.post('/filters/{}/create/'.format(
             self.aliases[0].name), self.form_data)
 
         # make sure it redirects to the dashboard
@@ -117,38 +117,38 @@ class DomainTest(TestCase):
             '/dashboard/{}/'.format(self.aliases[0].name),
             302, 200)
 
-        # check that the dashboard shows the new domain
+        # check that the dashboard shows the new filter
         response = self.client.get('/dashboard/{}/'.format(self.aliases[0].name))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.form_data['name'])
 
-    def test_domain_form(self):
+    def test_filter_form(self):
         # testing the form's validity
-        form = DomainForm(self.form_data)
+        form = FilterForm(self.form_data)
         self.assertEquals(form.is_valid(), True)
 
-    def test_domain_delete(self):
+    def test_filter_delete(self):
         # login as user 0 (owner)
         self.client.force_login(self.users[0])
 
         # submit the POST request with an empty data dict
-        response = self.client.post('/domains/{}/delete/'.format(self.domains[0].pk), {})
+        response = self.client.post('/filters/{}/delete/'.format(self.filters[0].pk), {})
 
         # make sure it redirects to the dashboard
         self.assertRedirects(response,
             '/dashboard/{}/'.format(self.aliases[0].name),
             302, 200)
 
-        # check that the dashboard doesn't show the domain
+        # check that the dashboard doesn't show the filter
         response = self.client.get('/dashboard/{}/'.format(self.aliases[0].name))
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, self.domains[0].name)
+        self.assertNotContains(response, self.filters[0].name)
 
-        # check that the domain is gone
-        domains = Domain.objects.all()
-        self.assertNotIn(self.domains[0], domains)
+        # check that the filter is gone
+        filters = Filter.objects.all()
+        self.assertNotIn(self.filters[0], filters)
 
-    def test_domain_block(self):
+    def test_filter_block(self):
         # login as user 0 (owner)
         self.client.force_login(self.users[0])
 
@@ -159,19 +159,19 @@ class DomainTest(TestCase):
         for action in actions:
 
             # GET request for action
-            response = self.client.get('/domains/{}/filter/{}/'.format(
-                self.domains[0].pk, action))
+            response = self.client.get('/filters/{}/filter/{}/'.format(
+                self.filters[0].pk, action))
 
             # check the redirect
             self.assertRedirects(response,
-                '/dashboard/{}/'.format(self.domains[0].alias.name),
+                '/dashboard/{}/'.format(self.filters[0].alias.name),
                 302, 200)
 
             # reload object's values
-            self.domains[0].refresh_from_db()
+            self.filters[0].refresh_from_db()
 
             # make sure the object has changed
             if action == 'allow':
-                self.assertEqual(self.domains[0].is_blocked, False)
+                self.assertEqual(self.filters[0].is_blocked, False)
             elif action == 'block':
-                self.assertEqual(self.domains[0].is_blocked, True)
+                self.assertEqual(self.filters[0].is_blocked, True)

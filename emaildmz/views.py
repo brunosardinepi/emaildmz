@@ -9,8 +9,8 @@ from allauth.account import views
 from aliases.forms import AliasForm
 from aliases.models import Alias
 from aliases.utils import get_alias_recipients, get_user_aliases
-from domains.forms import DomainForm
-from domains.utils import get_alias_domains, get_user_domains
+from filters.forms import FilterForm
+from filters.utils import get_alias_filters, get_user_filters
 from recipients.forms import RecipientForm
 from recipients.models import Recipient
 
@@ -33,7 +33,7 @@ def dashboard_view(request, alias_name=None):
         # otherwise, there is no active alias
         else:
             active_alias = None
-            domains = None
+            filters = None
 
     if active_alias:
         # if there's an active alias, make sure the person viewing this is the owner
@@ -45,8 +45,8 @@ def dashboard_view(request, alias_name=None):
             # get the active alias's recipients
             recipients = get_alias_recipients(active_alias)
 
-            # get the active alias's domains
-            domains = get_alias_domains(active_alias)
+            # get the active alias's filters
+            filters = get_alias_filters(active_alias)
 
     # no active alias, so no recipients to get
     else:
@@ -56,8 +56,8 @@ def dashboard_view(request, alias_name=None):
         'active_alias': active_alias,
         'alias_form': AliasForm(),
         'aliases': aliases,
-        'domain_form': DomainForm(),
-        'domains': domains,
+        'filter_form': FilterForm(),
+        'filters': filters,
         'recipient_form': RecipientForm(),
         'recipients': recipients,
     })

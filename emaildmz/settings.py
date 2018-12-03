@@ -21,7 +21,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'widget_tweaks',
     'aliases',
-    'domains',
+    'filters',
     'recipients',
 ]
 

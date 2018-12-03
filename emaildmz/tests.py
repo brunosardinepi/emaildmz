@@ -7,7 +7,7 @@ from model_mommy import mommy
 
 from . import views
 from aliases.models import Alias
-from domains.models import Domain
+from filters.models import Filter
 from recipients.models import Recipient
 
 
@@ -41,18 +41,18 @@ class HomeTest(TestCase):
         self.recipients[4].user = self.users[1]
         self.recipients[4].save()
 
-        self.domains = mommy.make(
-            Domain,
+        self.filters = mommy.make(
+            Filter,
             user=self.users[0],
             _quantity=6,
             _fill_optional=True,
         )
-        self.domains[3].user = self.users[1]
-        self.domains[3].save()
-        self.domains[4].user = self.users[1]
-        self.domains[4].save()
-        self.domains[5].user = self.users[1]
-        self.domains[5].save()
+        self.filters[3].user = self.users[1]
+        self.filters[3].save()
+        self.filters[4].user = self.users[1]
+        self.filters[4].save()
+        self.filters[5].user = self.users[1]
+        self.filters[5].save()
 
     def test_dashboard(self):
         response = self.client.get('/dashboard/')
@@ -76,12 +76,12 @@ class HomeTest(TestCase):
                         else:
                             self.assertNotContains(response, recipient.email)
 
-                    # check for user's domains
-                    for domain in self.domains:
-                        if domain.user == user and domain.alias == alias:
-                            self.assertContains(response, domain.name)
+                    # check for user's filters
+                    for filter in self.filters:
+                        if filter.user == user and filter.alias == alias:
+                            self.assertContains(response, filter.name)
                         else:
-                            self.assertNotContains(response, domain.name)
+                            self.assertNotContains(response, filter.name)
 
                 else:
                     self.assertNotContains(response, alias.name)
