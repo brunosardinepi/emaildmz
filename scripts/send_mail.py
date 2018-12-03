@@ -104,14 +104,14 @@ def get_alias_id(email):
 def domain_is_blocked(alias_id, user_id, sender_email):
     open("/home/relay/test.txt", "w").close()
 
+    # get the sender's email address
+    sender_email = sender_email.split("<")[1]
+    sender_email = sender_email.split(">")[0]
+
     # strip the domain from the sender's email
     domain = sender_email.split('@')[1]
-    domain = domain.replace(">", "")
 
-    with open("/home/relay/test.txt", "a") as file:
-        file.write("domain = {}\n".format(domain))
-
-    # check for this domain in the alias's domain list
+    # connect to the database
     conn = psycopg2.connect(host=config.settings['db_host'],
                             database=config.settings['db_name'],
                             user=config.settings['db_user'],
@@ -119,31 +119,62 @@ def domain_is_blocked(alias_id, user_id, sender_email):
     )
     cur = conn.cursor()
 
-    cur.execute("SELECT is_blocked FROM domains_domain WHERE alias_id = %s AND name = %s",
-        (alias_id, domain,))
-    row = cur.fetchone()
+    # find filters that block this domain
+    query = """ SELECT name
+                FROM filters_filter
+                WHERE alias_id = {}
+                AND is_blocked = 't'
+                AND name ILIKE '%' || '{}' || '%' """.format(alias_id, domain)
 
-    with open("/home/relay/test.txt", "a") as file:
-        file.write("row = {}\n".format(row))
+    cur.execute(query)
+    rows_blocked = cur.fetchall()
 
-    # see if the domain exists for this alias
-    if row is not None:
-        is_blocked = row[0]
+    # convert the results to a list
+    rows_blocked = [row[0] for row in rows_blocked]
 
-    # if it doesn't exist, add it as "allowed"
+    # find all filters for this domain
+    query = """ SELECT name
+                FROM filters_filter
+                WHERE alias_id = {}
+                AND name ILIKE '%' || '{}' || '%' """.format(alias_id, domain)
+
+    cur.execute(query)
+    rows_all = cur.fetchall()
+
+    # convert the results to a list
+    rows_all = [row[0] for row in rows_all]
+
+    # check for '*' entry in the blocked filters
+    catchall = "*@{}".format(domain)
+    if catchall in rows_blocked:
+
+        # this domain is blocked
+        is_blocked = True
+
+    # check for exact match in the blocked filters
+    elif sender_email in rows_blocked:
+
+        # this sender is blocked
+        is_blocked = True
+
+    # if nothing matched, then this domain is either
+    # in the allowed filter, or there is no filter yet
     else:
-        cur.execute("INSERT INTO domains_domain (name, is_blocked, alias_id, user_id) "
-                    "VALUES (%s, %s, %s, %s)",
-                    (domain, False, alias_id, user_id,))
 
-        # save the changes
-        conn.commit()
+        # make sure there isn't an entry already
+        if sender_email not in rows_all and catchall not in rows_all:
 
-        # set to "allowed"
+            # add a filter, set to allow
+            query = """ INSERT INTO filters_filter (name, is_blocked, alias_id, user_id)
+                        VALUES ('{}', {}, {}, {}) """.format(
+                            sender_email, False, alias_id, user_id)
+            cur.execute(query)
+
+            # save the changes
+            conn.commit()
+
+        # set local variable to "allowed"
         is_blocked = False
-
-    with open("/home/relay/test.txt", "a") as file:
-        file.write("is_blocked = {}\n".format(is_blocked))
 
     # if it's blocked, return True
     if is_blocked == True:
@@ -187,9 +218,6 @@ def send_email(content):
         # get the alias recipients
         recipients = get_alias_recipients(alias_id)
 
-        with open("/home/relay/test.txt", "a") as file:
-            file.write("recipients = {}\n".format(recipients))
-
         # check if there is anyone to forward to
         if len(recipients) < 1:
             return
@@ -204,6 +232,7 @@ def send_email(content):
         email['From'] = 'no-reply@emaildmz.com'
         email['To'] = ", ".join(recipients)
         email.set_payload(message)
+
         # sending the email
         s = smtplib.SMTP('localhost')
         s.sendmail(email['From'], recipients, email.as_string())
